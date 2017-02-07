@@ -9,6 +9,8 @@ const url = require('url')
 
 const {dialog} = require('electron') 
 var fs = require('fs')
+
+const {ipcMain} = require('electron')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -45,7 +47,8 @@ app.on('ready', ()=> {
     console.log('CommandOrControl+O is pressed')
     fs.readFile(dialog.showOpenDialog({properties: ['openFile']})[0], 'utf8', function (err, data) {
       if (err) return console.log(err);
-      global.text = {'text-val': data};
+      //global.text = {'text-val': data};
+      mainWindow.webContents.send('file-loaded', data);
       // data is the contents of the text file we just read
     });
   });
