@@ -11,6 +11,9 @@ const {dialog} = require('electron')
 var fs = require('fs')
 
 const {ipcMain} = require('electron')
+
+var exports = module.exports = {};
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -27,7 +30,7 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -45,11 +48,7 @@ app.on('ready', ()=> {
   createWindow();
   const ret = globalShortcut.register('CommandOrControl+O', () => {
     console.log('CommandOrControl+O is pressed');
-    fs.readFile(dialog.showOpenDialog({properties: ['openFile']})[0], 'utf8', function (err, data) {
-      if (err) return console.log(err);
-      mainWindow.webContents.send('file-loaded', data);
-      // data is the contents of the text file we just read
-    });
+    loadFile();
   });
   const ret2 = globalShortcut.register('CommandOrControl+S', () => {
     console.log('CommandOrControl+S is pressed');
@@ -59,11 +58,7 @@ app.on('ready', ()=> {
 
 ipcMain.on('file-save-request', (event, arg) => {
   console.log("file-save-request");
-  dialog.showSaveDialog(function (fileName) {
-    if (fileName === undefined) return;
-    fs.writeFile(fileName, arg, function (err) {   
-    });
-  }); 
+  saveFile(arg);
 });
 
 // Quit when all windows are closed.
@@ -86,6 +81,27 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-function writeToFile(what, where){
-  return 0;
+function loadFile(which) {
+  var error = 0;
+  fs.readFile(dialog.showOpenDialog({properties: ['openFile']})[0], 'utf8', function (err, data) {
+      if (err) {
+        error = err;
+        return console.log(err);
+      };
+      mainWindow.webContents.send('file-loaded', data);
+      // data is the contents of the text file we just read
+    });
+  return error;
 }
+function saveFile(arg) {
+  var error = 0;
+  dialog.showSaveDialog(function (fileName) {
+    if (fileName === undefined) return;
+    fs.writeFile(fileName, arg, function (err) {   
+    });
+  }); 
+  return error;
+}
+
+exports.loadFile = loadFile;
+exports.saveFile = saveFile;
