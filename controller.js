@@ -4,9 +4,12 @@ angular.module('HelloWorldApp', [])
       	var remote = require('electron').remote; 
 
       	ipcRenderer.on('file-loaded', (event, arg) => {
-	        console.log(arg) // prints "pong"
+	        console.log(arg)
 	        $scope.text = arg;
 	        $scope.$apply();
-	        //text = remote.getGlobal('text')['text-val'];
-      });
-});
+      	});
+      	ipcRenderer.on('file-save-request', (event, arg) => {
+      		console.log("got file-save-request");
+	        ipcRenderer.send('file-save-request', $scope.text);
+      	});
+	});

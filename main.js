@@ -44,15 +44,27 @@ function createWindow () {
 app.on('ready', ()=> {
   createWindow();
   const ret = globalShortcut.register('CommandOrControl+O', () => {
-    console.log('CommandOrControl+O is pressed')
+    console.log('CommandOrControl+O is pressed');
     fs.readFile(dialog.showOpenDialog({properties: ['openFile']})[0], 'utf8', function (err, data) {
       if (err) return console.log(err);
-      //global.text = {'text-val': data};
       mainWindow.webContents.send('file-loaded', data);
       // data is the contents of the text file we just read
     });
   });
+  const ret2 = globalShortcut.register('CommandOrControl+S', () => {
+    console.log('CommandOrControl+S is pressed');
+    mainWindow.webContents.send('file-save-request', 0);
+  });
 })
+
+ipcMain.on('file-save-request', (event, arg) => {
+  console.log("file-save-request");
+  dialog.showSaveDialog(function (fileName) {
+    if (fileName === undefined) return;
+    fs.writeFile(fileName, arg, function (err) {   
+    });
+  }); 
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
